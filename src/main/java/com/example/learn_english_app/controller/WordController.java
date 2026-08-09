@@ -5,6 +5,7 @@ import com.example.learn_english_app.form.WordUpdateForm;
 import com.example.learn_english_app.dto.response.WordResponseDto;
 import com.example.learn_english_app.service.WordService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/words")
+@Validated
 public class WordController {
     private final WordService wordService;
     @PostMapping
