@@ -21,13 +21,13 @@ public class PhraseServiceImp implements PhraseService {
     private final UserRepo userRepo;
     private final GrammarErrorRepo grammarErrorRepo;
     @Override
-    public List<PhraseResponseDto> getAllPhrase() {
-        return phraseRepo.findAllByOrderByCreatedAtDesc().stream().map(PhraseMapper::toResponse).toList();
+    public List<PhraseResponseDto> getAllPhraseById(Long id) {
+        return phraseRepo.findAllByUserIdOrderByCreatedAtDesc(id).stream().map(PhraseMapper::toResponse).toList();
     }
 
     @Override
-    public PhraseResponseDto updatePhrase(Long id, PhraseUpdateForm phraseUpdateForm) {
-        Phrase phrase = phraseRepo.findById(id).orElseThrow(()-> new RuntimeException("Phrase Not Found"));
+    public PhraseResponseDto updatePhrase(Long phraseId, PhraseUpdateForm phraseUpdateForm) {
+        Phrase phrase = phraseRepo.findById(phraseId).orElseThrow(()-> new RuntimeException("Phrase Not Found"));
         PhraseMapper.toEntity(phrase, phraseUpdateForm);
         phraseRepo.save(phrase);
         return PhraseMapper.toResponse(phrase);
@@ -37,11 +37,14 @@ public class PhraseServiceImp implements PhraseService {
     public void deletePhrase(Long id) {
         phraseRepo.deleteById(id);
     }
-
+    public PhraseResponseDto findById(Long id){
+        Phrase phrase = phraseRepo.findById(id).orElseThrow();
+        return PhraseMapper.toResponse(phrase);
+    }
     @Override
-    public PhraseResponseDto createPhrase(PhraseCreateForm phraseCreateForm) {
+    public PhraseResponseDto createPhrase(Long userId,PhraseCreateForm phraseCreateForm) {
         Phrase phrase = PhraseMapper.toEntity(phraseCreateForm);
-        phrase.setUser(userRepo.findById(phraseCreateForm.getUserId()).orElseThrow());
+        phrase.setUser(userRepo.findById(userId).orElseThrow());
         phraseRepo.save(phrase);
         return PhraseMapper.toResponse(phrase);
     }

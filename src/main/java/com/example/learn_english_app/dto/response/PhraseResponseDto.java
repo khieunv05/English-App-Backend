@@ -11,4 +11,5 @@ public class PhraseResponseDto {
     private List<GrammarResponseDto> grammarErrors;
     private String correctedText;
     private LocalDateTime createdAt;
+    private Long userId;
 }

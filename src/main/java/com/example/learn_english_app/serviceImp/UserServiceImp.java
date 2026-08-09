@@ -28,6 +28,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
         userRepo.save(user);
         return UserMapper.toResponse(user);
     }
+    public UserResponseDto findByUsername(String username){
+        User user = userRepo.findByUsername(username);
+        return UserMapper.toResponse(user);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

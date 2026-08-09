@@ -20,6 +20,4 @@ public class WordUpdateForm {
     private String partOfSpeech;
     @NotBlank
     private Level level;
-
-    private Long userId;
 }

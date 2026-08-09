@@ -19,6 +19,4 @@ public class WordCreateForm {
     private String partOfSpeech;
     @NotBlank
     private Level level;
-
-    private Long userId;
 }

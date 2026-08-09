@@ -3,6 +3,7 @@ package com.example.learn_english_app.controller;
 import com.example.learn_english_app.dto.response.UserResponseDto;
 import com.example.learn_english_app.form.UserCreateForm;
 import com.example.learn_english_app.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
     @PostMapping
-    public UserResponseDto createUser(@RequestBody UserCreateForm userCreateForm){
+    public UserResponseDto createUser(@Valid @RequestBody UserCreateForm userCreateForm){
         return userService.createUser(userCreateForm);
     }
 }

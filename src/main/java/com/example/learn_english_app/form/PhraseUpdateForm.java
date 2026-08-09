@@ -18,6 +18,4 @@ public class PhraseUpdateForm {
     private List<GrammarError> grammarErrors;
     @NotBlank
     private String correctedText;
-
-    private Long userId;
 }

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface PhraseRepo extends JpaRepository<Phrase,Long> {
-    public List<Phrase> findAllByOrderByCreatedAtDesc();
+    public List<Phrase> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }

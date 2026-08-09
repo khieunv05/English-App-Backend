@@ -20,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 @ControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler
 implements MessageSourceAware, AuthenticationEntryPoint, AccessDeniedHandler {
@@ -60,6 +61,19 @@ implements MessageSourceAware, AuthenticationEntryPoint, AccessDeniedHandler {
         }
         var response = new ErrorResponse(messages,errors);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = NoSuchElementException.class)
+    public ResponseEntity<Object> handleNoSuchElementException(NoSuchElementException exception){
+        var message = "Không tìm thấy dữ liệu";
+        var error = new ErrorResponse(message);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException exception){
+        var error = new ErrorResponse(exception.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override

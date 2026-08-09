@@ -23,8 +23,8 @@ public class WordServiceImp implements WordService {
     private  final UserRepo userRepo;
     private final UserWordRepo userWordRepo;
     @Override
-    public WordResponseDto createWord(WordCreateForm dto) {
-        User user = userRepo.findById(dto.getUserId()).orElseThrow();
+    public WordResponseDto createWord(Long userId,WordCreateForm dto) {
+        User user = userRepo.findById(userId).orElseThrow();
         UserWord userWord = new UserWord();
         Word word = WordMapper.toEntity(dto);
         userWord.setUser(user);

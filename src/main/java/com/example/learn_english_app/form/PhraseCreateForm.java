@@ -18,6 +18,4 @@ public class PhraseCreateForm {
     private List<GrammarError> grammarErrors;
     @NotBlank
     private String correctedText;
-
-    private Long userId;
 }

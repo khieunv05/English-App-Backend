@@ -39,6 +39,7 @@ public class PhraseMapper {
         phraseResponseDto.setGrammarErrors(listGrammarResponseDto);
         phraseResponseDto.setCreatedAt(phrase.getCreatedAt());
         phraseResponseDto.setCorrectedText(phrase.getCorrectedText());
+        phraseResponseDto.setUserId(phrase.getUser().getId());
         return phraseResponseDto;
     }
 }
