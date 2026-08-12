@@ -2,7 +2,6 @@ package com.example.learn_english_app.serviceImp;
 
 import com.example.learn_english_app.dto.response.PhraseResponseDto;
 import com.example.learn_english_app.entity.Phrase;
-import com.example.learn_english_app.entity.User;
 import com.example.learn_english_app.form.PhraseCreateForm;
 import com.example.learn_english_app.form.PhraseUpdateForm;
 import com.example.learn_english_app.mapper.PhraseMapper;
@@ -11,43 +10,53 @@ import com.example.learn_english_app.repository.PhraseRepo;
 import com.example.learn_english_app.repository.UserRepo;
 import com.example.learn_english_app.service.PhraseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PhraseServiceImp implements PhraseService {
     private final PhraseRepo phraseRepo;
     private final UserRepo userRepo;
     private final GrammarErrorRepo grammarErrorRepo;
+
     @Override
-    public List<PhraseResponseDto> getAllPhraseById(Long id) {
-        return phraseRepo.findAllByUserIdOrderByCreatedAtDesc(id).stream().map(PhraseMapper::toResponse).toList();
+    public List<PhraseResponseDto> getAllPhraseById(Long userId) {
+        return phraseRepo.findAllByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(PhraseMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public PhraseResponseDto updatePhrase(Long phraseId, PhraseUpdateForm phraseUpdateForm) {
-        Phrase phrase = phraseRepo.findById(phraseId).orElseThrow(()-> new RuntimeException("Phrase Not Found"));
-        PhraseMapper.toEntity(phrase, phraseUpdateForm);
-        phraseRepo.save(phrase);
-        return PhraseMapper.toResponse(phrase);
-    }
-
-    @Override
-    public void deletePhrase(Long id) {
-        phraseRepo.deleteById(id);
-    }
-    public PhraseResponseDto findById(Long id){
-        Phrase phrase = phraseRepo.findById(id).orElseThrow();
-        return PhraseMapper.toResponse(phrase);
-    }
-    @Override
-    public PhraseResponseDto createPhrase(Long userId,PhraseCreateForm phraseCreateForm) {
-        Phrase phrase = PhraseMapper.toEntity(phraseCreateForm);
+    @Transactional
+    public PhraseResponseDto createPhrase(Long userId, PhraseCreateForm dto) {
+        Phrase phrase = PhraseMapper.toEntity(dto);
         phrase.setUser(userRepo.findById(userId).orElseThrow());
         phraseRepo.save(phrase);
         return PhraseMapper.toResponse(phrase);
     }
 
 
+    @Override
+    @Transactional
+    public void deletePhrase(Long userId, Long id) {
+        Phrase phrase = getPhraseEntity(id);
+        checkOwnership(phrase, userId);
+        phraseRepo.deleteById(id);
+    }
+
+    private Phrase getPhraseEntity(Long id) {
+        return phraseRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Phrase Not Found"));
+    }
+
+    private void checkOwnership(Phrase phrase, Long userId) {
+        if (!phrase.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Bạn không có quyền thao tác trên phrase này");
+        }
+    }
 }

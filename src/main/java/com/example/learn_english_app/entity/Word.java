@@ -19,7 +19,7 @@ public class Word {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "english",nullable = false,unique = true)
+    @Column(name = "english",nullable = false)
     private String english;
 
     @Column(name = "vietnamese",nullable = false)
@@ -41,5 +41,20 @@ public class Word {
     @Column(name = "level",nullable = false)
     private Level level;
 
+    private int reviewCount;
+    private LocalDateTime nextReview;
+    private boolean favorite;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
 }

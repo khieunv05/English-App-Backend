@@ -15,19 +15,40 @@ public class PhraseMapper {
         phrase.setText(phraseCreateForm.getText());
         phrase.setScore(phraseCreateForm.getScore());
         phrase.setCorrectedText(phraseCreateForm.getCorrectedText());
-        phrase.setGrammarErrors(phraseCreateForm.getGrammarErrors());
-        if(phrase.getGrammarErrors() != null){
-            for(GrammarError grammarError : phrase.getGrammarErrors()){
-                grammarError.setPhrase(phrase);
-            }
-        }
+        List<GrammarError> errors = phraseCreateForm.getGrammarErrors() == null
+                ? List.of()
+                : phraseCreateForm.getGrammarErrors().stream()
+                .map(errDto -> {
+                    GrammarError error = new GrammarError();
+                    error.setIncorrect(errDto.getIncorrect());
+                    error.setCorrection(errDto.getCorrection());
+                    error.setExplanation(errDto.getExplanation());
+                    error.setPhrase(phrase);
+                    return error;
+                })
+                .toList();
+
+        phrase.setGrammarErrors(errors);
         return phrase;
     }
     public static Phrase toEntity(Phrase phrase,PhraseUpdateForm phraseUpdateForm){
         phrase.setText(phraseUpdateForm.getText());
         phrase.setScore(phraseUpdateForm.getScore());
         phrase.setCorrectedText(phraseUpdateForm.getCorrectedText());
-        phrase.setGrammarErrors(phraseUpdateForm.getGrammarErrors());
+        List<GrammarError> errors = phraseUpdateForm.getGrammarErrors() == null
+                ? List.of()
+                : phraseUpdateForm.getGrammarErrors().stream()
+                .map(errDto -> {
+                    GrammarError error = new GrammarError();
+                    error.setIncorrect(errDto.getIncorrect());
+                    error.setCorrection(errDto.getCorrection());
+                    error.setExplanation(errDto.getExplanation());
+                    error.setPhrase(phrase);
+                    return error;
+                })
+                .toList();
+
+        phrase.setGrammarErrors(errors);
         return phrase;
     }
     public static PhraseResponseDto toResponse(Phrase phrase){

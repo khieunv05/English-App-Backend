@@ -1,5 +1,7 @@
 package com.example.learn_english_app.config.jwt;
 
+import com.example.learn_english_app.entity.User;
+import com.example.learn_english_app.repository.UserRepo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,12 +26,13 @@ import java.util.stream.Collectors;
 
 public class JwtLoginFilter extends AbstractAuthenticationProcessingFilter  {
     private final JwtEncoder jwtEncoder;
+    private final UserRepo userRepo;
 
-
-    public JwtLoginFilter(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder) {
+    public JwtLoginFilter(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder,UserRepo userRepo) {
         super(PathPatternRequestMatcher.withDefaults()
                 .matcher(HttpMethod.POST,"/api/v1/auth/login"), authenticationManager);
         this.jwtEncoder = jwtEncoder;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -43,12 +46,14 @@ public class JwtLoginFilter extends AbstractAuthenticationProcessingFilter  {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        User user = userRepo.findByUsername(authResult.getName());
         var now = Instant.now();
         var claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(18000L))
                 .subject(authResult.getName())
+                .claim("userId", user.getId())
                 .build();
         var token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
         response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);

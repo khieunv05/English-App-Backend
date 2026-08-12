@@ -1,10 +1,9 @@
 package com.example.learn_english_app.controller;
 
-import com.example.learn_english_app.dto.response.UserResponseDto;
 import com.example.learn_english_app.form.WordCreateForm;
+import com.example.learn_english_app.form.WordUpdateFavoriteForm;
 import com.example.learn_english_app.form.WordUpdateForm;
 import com.example.learn_english_app.dto.response.WordResponseDto;
-import com.example.learn_english_app.service.UserService;
 import com.example.learn_english_app.service.WordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +20,43 @@ import java.util.List;
 @Validated
 public class WordController {
     private final WordService wordService;
-    private final UserService userService;
+
     @PostMapping
     public WordResponseDto createWord(@Valid @RequestBody WordCreateForm dto, @AuthenticationPrincipal Jwt jwt){
-        UserResponseDto userResponseDto = userService.findByUsername(jwt.getSubject());
-        return wordService.createWord(userResponseDto.getId(),dto);
+        Long userId = jwt.getClaim("userId");
+        return wordService.createWord(userId, dto);
     }
+
     @PutMapping("/{id}")
-    public WordResponseDto updateWord(@PathVariable Long id,@Valid @RequestBody WordUpdateForm dto){
-        return wordService.updateWord(id,dto);
+    public WordResponseDto updateWord(@PathVariable Long id,
+                                      @Valid @RequestBody WordUpdateForm dto,
+                                      @AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        return wordService.updateWord(userId, id, dto);
     }
+
     @DeleteMapping("/{id}")
-    public void deleteWord(@PathVariable Long id){
-        wordService.deleteWordById(id);
+    public void deleteWord(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        wordService.deleteWordById(userId, id);
+    }
+    @PutMapping("/{id}/favorite")
+    public WordResponseDto updateFavorite(@PathVariable Long id,
+                                          @Valid @RequestBody WordUpdateFavoriteForm dto,
+                                          @AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        return wordService.updateFavorite(userId,id,dto);
+    }
+    @PutMapping("/{id}/review")
+    public WordResponseDto reviewWord(@PathVariable Long id,
+                                      @AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("userId");
+        return wordService.updateReviewCount(userId, id);
+    }
+
+    @GetMapping("/me")
+    public List<WordResponseDto> getMyWords(@AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        return wordService.getMyWords(userId);
     }
 }

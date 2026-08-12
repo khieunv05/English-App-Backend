@@ -15,4 +15,8 @@ public class WordResponseDto {
     private String pronunciation;
     private String partOfSpeech;
     private Level level;
+    private int reviewCount;
+    private LocalDateTime nextReview;
+    private boolean favorite;
+    private LocalDateTime createdAt;
 }

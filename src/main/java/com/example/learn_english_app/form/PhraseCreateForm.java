@@ -10,12 +10,10 @@ import java.util.List;
 public class PhraseCreateForm {
     @NotBlank
     private String text;
-    @NotBlank
     @Max(value = 10)
     @Min(value = 0)
     private int score;
-    @NotBlank
-    private List<GrammarError> grammarErrors;
+    private List<GrammarErrorCreateForm> grammarErrors;
     @NotBlank
     private String correctedText;
 }

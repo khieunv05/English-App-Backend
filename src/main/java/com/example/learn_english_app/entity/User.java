@@ -19,4 +19,7 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<Phrase> phrases;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Word> words;
 }
