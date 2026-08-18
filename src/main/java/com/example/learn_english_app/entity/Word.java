@@ -41,8 +41,11 @@ public class Word {
     @Column(name = "level",nullable = false)
     private Level level;
 
+    @Column(name = "review_count")
     private int reviewCount;
+    @Column(name = "next_review")
     private LocalDateTime nextReview;
+    @Column(name = "favorite")
     private boolean favorite;
 
     @ManyToOne

@@ -97,4 +97,10 @@ implements MessageSourceAware, AuthenticationEntryPoint, AccessDeniedHandler {
         var out = response.getOutputStream();
         new ObjectMapper().writeValue(out,error);
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException exception){
+        var error = new ErrorResponse(exception.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 }
