@@ -1,5 +1,6 @@
 package com.example.learn_english_app.serviceImp;
 
+import com.example.learn_english_app.dto.response.GeminiPhraseResponseDto;
 import com.example.learn_english_app.dto.response.GeminiWordResponseDto;
 import com.example.learn_english_app.entity.WordCache;
 import com.example.learn_english_app.repository.WordCacheRepo;
@@ -62,7 +63,90 @@ public class GeminiService {
         return geminiWordResponse;
     }
 
+    public GeminiPhraseResponseDto callGeminiPhrase(String inputText){
+        String prompt = String.format("""
+        Bạn là một giáo viên tiếng Anh chuyên chấm chữa lỗi ngữ pháp,
+        có nhiều năm kinh nghiệm giảng dạy cho người Việt học tiếng Anh.
 
+        Hãy phân tích đoạn văn bản tiếng Anh sau:
+        '%s'
+
+        Thực hiện theo đúng thứ tự các bước sau:
+
+        BƯỚC 1 - Sửa lỗi:
+        Đọc kỹ toàn bộ đoạn văn, xác định NGỮ CẢNH chung (thì của câu, chủ đề,
+        văn phong) trước khi sửa từng lỗi riêng lẻ. Điều này đảm bảo các lỗi
+        được sửa nhất quán với nhau (ví dụ: nếu cả đoạn ở thì quá khứ, mọi lỗi
+        chia động từ phải được sửa về đúng thì quá khứ, không phải thì hiện tại).
+
+        BƯỚC 2 - Điền kết quả theo cấu trúc:
+        1. text: giữ nguyên văn bản gốc người dùng nhập vào, không thay đổi.
+        2. correctedText: toàn bộ văn bản sau khi đã sửa hết lỗi, giữ nguyên
+           ý nghĩa và văn phong gốc, chỉ sửa phần sai.
+        3. grammarErrors: liệt kê TẤT CẢ lỗi tìm được ở Bước 1, mỗi lỗi gồm:
+           - incorrect: đoạn văn bản gốc bị sai (trích chính xác từ câu gốc).
+           - correction: cách sửa đúng cho đoạn đó.
+           - explanation: giải thích ngắn gọn bằng tiếng Việt tại sao đó là lỗi
+             và tại sao cách sửa lại đúng.
+           Nếu văn bản không có lỗi nào, trả về mảng rỗng [].
+        4. score: chấm điểm từ 0 đến 10 dựa trên độ chính xác ngữ pháp,
+           cách dùng từ, và độ tự nhiên của câu. 10 là hoàn hảo không lỗi,
+           càng nhiều lỗi nghiêm trọng thì điểm càng thấp.
+
+        BƯỚC 3 - Tự kiểm tra trước khi trả kết quả:
+        Đảm bảo mỗi "correction" trong grammarErrors, khi áp dụng vào đúng vị trí
+        tương ứng trong "text", phải cho ra kết quả khớp CHÍNH XÁC với "correctedText".
+        Nếu phát hiện không khớp, sửa lại "correction" hoặc "correctedText" cho nhất quán
+        trước khi trả về.
+
+        Chỉ trả về JSON theo đúng schema, không thêm giải thích hay văn bản nào khác
+        ngoài JSON.
+        """, inputText);
+
+        Schema grammarErrorSchema = Schema.builder()
+                .type("OBJECT")
+                .properties(Map.of(
+                        "incorrect", Schema.builder().type("STRING").build(),
+                        "correction", Schema.builder().type("STRING").build(),
+                        "explanation", Schema.builder().type("STRING").build()
+                ))
+                .required(List.of("incorrect", "correction", "explanation"))
+                .build();
+
+        Schema schema = Schema.builder()
+                .type("OBJECT")
+                .properties(Map.of(
+                        "text", Schema.builder().type("STRING").build(),
+                        "score", Schema.builder().type("INTEGER").build(),
+                        "grammarErrors", Schema.builder()
+                                .type("ARRAY")
+                                .items(grammarErrorSchema)
+                                .build(),
+                        "correctedText", Schema.builder().type("STRING").build()
+                ))
+                .required(List.of("text", "score", "grammarErrors", "correctedText"))
+                .build();
+
+        GenerateContentConfig config = GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+                .responseSchema(schema)
+                .temperature(0.1f)
+                .build();
+        try{
+            GenerateContentResponse response = geminiClient.models.generateContent(
+                    modelName,
+                    prompt,
+                    config
+            );
+
+            String jsonOutput = response.text();
+            return objectMapper.readValue(jsonOutput, GeminiPhraseResponseDto.class);
+
+        }
+        catch (Exception e){
+            throw new RuntimeException("Gặp lỗi khi gọi Gemini API: " + e.getMessage(),e);
+        }
+    }
     private GeminiWordResponseDto callGeminiApi(String rawWord){
         GenerateContentResponse response;
         String jsonOutput;
