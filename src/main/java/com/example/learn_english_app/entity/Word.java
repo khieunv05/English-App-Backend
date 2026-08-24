@@ -1,6 +1,7 @@
 package com.example.learn_english_app.entity;
 
 import com.example.learn_english_app.enums.Level;
+import com.example.learn_english_app.enums.PartOfSpeech;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+// Can them dieu kien unique cho user id và english, lưu vào db dạng chữ thường
 public class Word {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +36,9 @@ public class Word {
     @Column(name = "pronunciation",nullable = false)
     private String pronunciation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "part_of_speech",nullable = false)
-    private String partOfSpeech;
+    private PartOfSpeech partOfSpeech;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "level",nullable = false)

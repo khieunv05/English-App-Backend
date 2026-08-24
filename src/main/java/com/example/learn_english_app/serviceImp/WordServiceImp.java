@@ -1,5 +1,6 @@
 package com.example.learn_english_app.serviceImp;
 
+import com.example.learn_english_app.dto.response.WordsByDateResponse;
 import com.example.learn_english_app.entity.User;
 import com.example.learn_english_app.form.*;
 import com.example.learn_english_app.dto.response.WordResponseDto;
@@ -13,7 +14,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,11 +62,23 @@ public class WordServiceImp implements WordService {
     }
 
     @Override
-    public List<WordResponseDto> getMyWords(Long userId) {
-        return wordRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(WordMapper::toResponse)
-                .toList();
+    public List<WordsByDateResponse> getMyWords(Long userId) {
+        List<Word> words = wordRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        Map<LocalDate,List<WordResponseDto>> group = words.stream().collect(
+                Collectors.groupingBy(
+                       word->word.getCreatedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.mapping(WordMapper::toResponse,Collectors.toList())
+                )
+
+               );
+        return group.entrySet().stream()
+                .map(
+                        item -> new WordsByDateResponse(
+                                item.getKey(),
+                                item.getValue()
+                        )
+                ).toList();
     }
 
     @Override
@@ -80,6 +97,13 @@ public class WordServiceImp implements WordService {
         word.setReviewCount(word.getReviewCount()+1);
         word.setNextReview(srsService.calculateNextReview(word.getReviewCount()));
         wordRepository.save(word);
+        return WordMapper.toResponse(word);
+    }
+
+    @Override
+    public WordResponseDto getWordResponseById(Long userId, Long id) {
+        Word word = getWordById(id);
+        checkOwnership(word,userId);
         return WordMapper.toResponse(word);
     }
 

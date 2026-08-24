@@ -55,6 +55,8 @@ public class GeminiService {
             wordCache.setVietnamese(geminiWordResponse.getVietnamese());
             wordCache.setExample(geminiWordResponse.getExample());
             wordCache.setExampleTranslation(geminiWordResponse.getExampleTranslation());
+            wordCache.setPartOfSpeech(geminiWordResponse.getPartOfSpeech());
+            wordCache.setLevel(geminiWordResponse.getLevel());
             wordCacheRepo.save(wordCache);
         }
         catch (DataIntegrityViolationException e){
@@ -160,15 +162,23 @@ public class GeminiService {
         Xác định xem chuỗi trên có phải là một từ tiếng Anh có thật và có nghĩa hay không
         (không phải chuỗi ký tự ngẫu nhiên, gõ sai chính tả, hoặc vô nghĩa).
 
-        - Nếu KHÔNG hợp lệ: trả về valid = false, các trường còn lại
-          (pronunciation, vietnamese, example, exampleTranslation) để chuỗi rỗng "".
-          Trường english giữ nguyên chuỗi đầu vào gốc.
+        - Nếu KHÔNG hợp lệ: trả về valid = false. Trường english giữ nguyên chuỗi đầu vào gốc.
+          Các trường pronunciation, vietnamese, example, exampleTranslation để chuỗi rỗng "".
+          Trường level trả về "A1" và partOfSpeech trả về "noun" (giá trị mặc định, không có ý nghĩa
+          thực tế trong trường hợp này).
 
         - Nếu hợp lệ: trả về valid = true và tạo đầy đủ dữ liệu từ vựng theo yêu cầu:
           - pronunciation: Phiên âm IPA chuẩn Anh-Mỹ.
           - vietnamese: Dịch nghĩa tiếng Việt ngắn gọn, sát nghĩa nhất.
           - example: Câu ví dụ tự nhiên, đúng ngữ pháp, sử dụng từ '%s'.
           - exampleTranslation: Bản dịch câu ví dụ sang tiếng Việt, chuẩn xác.
+          - partOfSpeech: Từ loại của từ, chỉ dùng MỘT trong các giá trị sau:
+            "noun", "verb", "adjective", "adverb", "preposition", "conjunction",
+            "pronoun", "interjection". Nếu từ có nhiều từ loại, chọn từ loại
+            phổ biến/thường dùng nhất.
+          - level: Cấp độ thông thạo theo khung CEFR, chỉ dùng MỘT trong các giá trị:
+            "A1", "A2", "B1", "B2", "C1", "C2" — dựa trên độ phổ biến và độ khó
+            của từ trong tiếng Anh giao tiếp/học thuật thông thường.
 
         Chỉ trả về JSON theo đúng schema, không thêm giải thích hay văn bản khác.
         """, rawWord, rawWord);
@@ -181,10 +191,22 @@ public class GeminiService {
                         "vietnamese", Schema.builder().type("STRING").build(),
                         "example", Schema.builder().type("STRING").build(),
                         "exampleTranslation", Schema.builder().type("STRING").build(),
+                        "level", Schema.builder()
+                                .type("STRING")
+                                .enum_(List.of("A1", "A2", "B1", "B2", "C1", "C2"))
+                                .build(),
+                        "partOfSpeech", Schema.builder()
+                                .type("STRING")
+                                .enum_(List.of(
+                                        "noun", "verb", "adjective", "adverb",
+                                        "preposition", "conjunction", "pronoun", "interjection"
+                                ))
+                                .build(),
                         "valid", Schema.builder().type("BOOLEAN").build()
                 ))
                 .required(List.of(
-                        "english", "pronunciation", "vietnamese", "example", "exampleTranslation", "valid"
+                        "english", "pronunciation", "vietnamese", "example",
+                        "exampleTranslation", "level", "partOfSpeech", "valid"
                 ))
                 .build();
 
@@ -214,6 +236,8 @@ public class GeminiService {
         geminiWordResponse.setExample(wordCache.getExample());
         geminiWordResponse.setPronunciation(wordCache.getPronunciation());
         geminiWordResponse.setExampleTranslation(wordCache.getExampleTranslation());
+        geminiWordResponse.setLevel(wordCache.getLevel());
+        geminiWordResponse.setPartOfSpeech(wordCache.getPartOfSpeech());
         geminiWordResponse.setValid(true);
         return geminiWordResponse;
     }

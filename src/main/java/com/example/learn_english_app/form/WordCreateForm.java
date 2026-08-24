@@ -1,6 +1,7 @@
 package com.example.learn_english_app.form;
 
 import com.example.learn_english_app.enums.Level;
+import com.example.learn_english_app.enums.PartOfSpeech;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -16,8 +17,8 @@ public class WordCreateForm {
     private String exampleTranslation;
     @NotBlank
     private String pronunciation;
-    @NotBlank
-    private String partOfSpeech;
+    @NotNull
+    private PartOfSpeech partOfSpeech;
     @NotNull
     private Level level;
 }

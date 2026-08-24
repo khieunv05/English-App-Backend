@@ -1,5 +1,6 @@
 package com.example.learn_english_app.controller;
 
+import com.example.learn_english_app.dto.response.WordsByDateResponse;
 import com.example.learn_english_app.form.WordCreateForm;
 import com.example.learn_english_app.form.WordUpdateFavoriteForm;
 import com.example.learn_english_app.form.WordUpdateForm;
@@ -55,8 +56,14 @@ public class WordController {
     }
 
     @GetMapping("/me")
-    public List<WordResponseDto> getMyWords(@AuthenticationPrincipal Jwt jwt){
+    public List<WordsByDateResponse> getMyWords(@AuthenticationPrincipal Jwt jwt){
         Long userId = jwt.getClaim("userId");
         return wordService.getMyWords(userId);
+    }
+
+    @GetMapping("/{id}")
+    public WordResponseDto getWordById(@PathVariable Long id,@AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        return wordService.getWordResponseById(userId,id);
     }
 }
