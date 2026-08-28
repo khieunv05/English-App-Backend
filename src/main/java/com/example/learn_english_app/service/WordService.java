@@ -18,4 +18,5 @@ public interface WordService {
     WordResponseDto updateFavorite(Long userId, Long id, WordUpdateFavoriteForm form);
     WordResponseDto updateReviewCount(Long userId,Long id);
     WordResponseDto getWordResponseById(Long userId,Long id);
+    List<WordResponseDto> updateListWordReview(Long userId,UpdateListWordReviewRequest wordIds);
 }

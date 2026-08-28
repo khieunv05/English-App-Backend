@@ -1,6 +1,7 @@
 package com.example.learn_english_app.controller;
 
 import com.example.learn_english_app.dto.response.WordsByDateResponse;
+import com.example.learn_english_app.form.UpdateListWordReviewRequest;
 import com.example.learn_english_app.form.WordCreateForm;
 import com.example.learn_english_app.form.WordUpdateFavoriteForm;
 import com.example.learn_english_app.form.WordUpdateForm;
@@ -65,5 +66,11 @@ public class WordController {
     public WordResponseDto getWordById(@PathVariable Long id,@AuthenticationPrincipal Jwt jwt){
         Long userId = jwt.getClaim("userId");
         return wordService.getWordResponseById(userId,id);
+    }
+    @PutMapping("/review")
+    public List<WordResponseDto> updateListWordReview(@AuthenticationPrincipal Jwt jwt,
+                                                      @RequestBody UpdateListWordReviewRequest updateListWordReviewRequest){
+        Long userId = jwt.getClaim("userId");
+        return wordService.updateListWordReview(userId,updateListWordReviewRequest);
     }
 }

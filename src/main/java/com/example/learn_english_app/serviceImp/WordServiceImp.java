@@ -32,6 +32,8 @@ public class WordServiceImp implements WordService {
         User user = userRepo.findById(userId).orElseThrow();
         Word word = WordMapper.toEntity(dto);
         word.setUser(user);
+        word.setReviewCount(word.getReviewCount()+1);
+        word.setNextReview(srsService.calculateNextReview(word.getReviewCount()));
         wordRepository.save(word);
         return WordMapper.toResponse(word);
     }
@@ -105,6 +107,13 @@ public class WordServiceImp implements WordService {
         Word word = getWordById(id);
         checkOwnership(word,userId);
         return WordMapper.toResponse(word);
+    }
+
+    @Override
+    public List<WordResponseDto> updateListWordReview(Long userId,UpdateListWordReviewRequest wordIds) {
+       return  wordIds.getWordIds().stream().map(
+                item-> updateReviewCount(userId,item)
+        ).toList();
     }
 
 
