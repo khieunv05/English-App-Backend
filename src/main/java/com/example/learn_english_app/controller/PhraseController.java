@@ -38,4 +38,10 @@ public class PhraseController {
         Long userId = jwt.getClaim("userId");
         phraseService.deletePhrase(userId, id);
     }
+
+    @GetMapping("/{id}")
+    public PhraseResponseDto findById(@PathVariable Long id,@AuthenticationPrincipal Jwt jwt){
+        Long userId = jwt.getClaim("userId");
+        return phraseService.findById(userId,id);
+    }
 }

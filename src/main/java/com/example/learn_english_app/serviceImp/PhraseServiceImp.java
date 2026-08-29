@@ -49,6 +49,13 @@ public class PhraseServiceImp implements PhraseService {
         phraseRepo.deleteById(id);
     }
 
+    @Override
+    public PhraseResponseDto findById(Long userId, Long id) {
+        Phrase phrase = getPhraseEntity(id);
+        checkOwnership(phrase,userId);
+        return PhraseMapper.toResponse(phrase);
+    }
+
     private Phrase getPhraseEntity(Long id) {
         return phraseRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Phrase Not Found"));
